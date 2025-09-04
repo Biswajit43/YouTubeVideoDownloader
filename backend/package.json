@@ -4,7 +4,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "npx yt-dlp --version || true"
+    "postinstall": "npx --yes yt-dlp --version || exit 0"
   },
   "dependencies": {
     "axios": "^1.11.0",
