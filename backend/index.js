@@ -6,6 +6,10 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 
+// --- FIX ---
+// Get the exact path to the yt-dlp binary
+const ytDlpPath = require('yt-dlp-exec').path;
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
@@ -31,6 +35,9 @@ app.post("/submit", async (req, res) => {
         const vidinfo = await youtubedl(url, {
             dumpSingleJson: true,
             noWarnings: true,
+            // --- FIX ---
+            // Explicitly provide the path to the yt-dlp executable
+            ytDlpPath: ytDlpPath,
         });
         return res.json(vidinfo);
     } catch (err) {
@@ -51,7 +58,8 @@ wss.on("connection", (ws) => {
         }
 
         try {
-            const vidinfo = await youtubedl(url, { dumpSingleJson: true });
+            // We still need to get the video info to create a safe filename
+            const vidinfo = await youtubedl(url, { dumpSingleJson: true, ytDlpPath: ytDlpPath });
             const safeTitle = vidinfo.title.replace(/[^a-z0-9_.-]/gi, "_");
             const finalFilename = `${safeTitle}.mp4`;
             const outputPath = path.join(downloadsDir, finalFilename);
@@ -62,6 +70,9 @@ wss.on("connection", (ws) => {
                 format: "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best",
                 output: outputPath,
                 mergeOutputFormat: "mp4",
+                // --- FIX ---
+                // Explicitly provide the path to the yt-dlp executable
+                ytDlpPath: ytDlpPath,
             });
 
             // Regex to capture download percentage
@@ -84,7 +95,7 @@ wss.on("connection", (ws) => {
                 ws.send(JSON.stringify({
                     type: "complete",
                     // Provide a URL the client can use to download the file
-                    fileUrl: `https://youtubevideodownloader-n0qo.onrender.com//downloads/${finalFilename}`
+                    fileUrl: `https://youtubevideodownloader-n0qo.onrender.com/downloads/${finalFilename}`
                 }));
             });
 
@@ -103,13 +114,14 @@ wss.on("connection", (ws) => {
         console.log("Client disconnected");
     });
 });
+
 app.get('/', (req,res) => {
     res.send("hello biswajit !")
 })
 
-
 // Use the HTTP server to listen, not the Express app
-server.listen(3000, () => {
-    console.log("✅ App with WebSocket running on http://localhost:3000");
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`✅ App with WebSocket running on port ${PORT}`);
     console.log("⚠️ Make sure FFmpeg is installed and added to your system's PATH.");
 });
