@@ -86,6 +86,8 @@ wss.on("connection", (ws) => {
 });
 
 app.get('/', (req, res) => res.send("hello biswajit !"));
+console.log("API URL =>", import.meta.env.VITE_BACKEND_API_URL);
+console.log("WS URL  =>", import.meta.env.VITE_BACKEND_WS_URL);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
