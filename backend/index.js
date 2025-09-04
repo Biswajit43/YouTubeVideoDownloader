@@ -103,7 +103,9 @@ wss.on("connection", (ws) => {
         console.log("Client disconnected");
     });
 });
-
+app.get('/', (req,res) => {
+    res.send("hello biswajit !")
+})
 
 
 // Use the HTTP server to listen, not the Express app
