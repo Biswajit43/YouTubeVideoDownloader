@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: youtube-video-downloader # You can change this name
+    env: node
+    plan: free # or your preferred plan
+    buildCommand: "npm install"
+    startCommand: "node index.js"
+    nativeEnvironment:
+      packages:
+        - name: ffmpeg
