@@ -84,7 +84,7 @@ wss.on("connection", (ws) => {
                 ws.send(JSON.stringify({
                     type: "complete",
                     // Provide a URL the client can use to download the file
-                    fileUrl: `http://localhost:3000/downloads/${finalFilename}`
+                    fileUrl: `https://youtubevideodownloader-n0qo.onrender.com//downloads/${finalFilename}`
                 }));
             });
 
@@ -103,6 +103,8 @@ wss.on("connection", (ws) => {
         console.log("Client disconnected");
     });
 });
+
+
 
 // Use the HTTP server to listen, not the Express app
 server.listen(3000, () => {

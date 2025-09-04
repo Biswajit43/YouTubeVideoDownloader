@@ -21,7 +21,7 @@ const Home = () => {
         setLoading(true);
 
         try {
-            const res = await fetch(`http://localhost:3000/submit`, {
+            const res = await fetch(`https://youtubevideodownloader-n0qo.onrender.com/submit`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ url }),
@@ -56,7 +56,7 @@ const Home = () => {
         setDownloadProgress(0);
 
         // Establish WebSocket connection
-        ws.current = new WebSocket("ws://localhost:3000");
+        ws.current = new WebSocket("ws://youtubevideodownloader-n0qo.onrender.com");
 
         ws.current.onopen = () => {
             console.log("WebSocket connected");
