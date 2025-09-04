@@ -56,7 +56,8 @@ const Home = () => {
         setDownloadProgress(0);
 
         // Establish WebSocket connection
-        ws.current = new WebSocket("ws://youtubevideodownloader-n0qo.onrender.com");
+        ws.current = new WebSocket("wss://youtubevideodownloader-n0qo.onrender.com");
+
 
         ws.current.onopen = () => {
             console.log("WebSocket connected");
