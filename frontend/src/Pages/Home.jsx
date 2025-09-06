@@ -2,8 +2,11 @@ import React, { useState, useRef } from "react";
 
 // --- FIX ---
 // Use environment variables for the backend URLs
-const VITE_BACKEND_API_URL = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:3000";
-const VITE_BACKEND_WS_URL = import.meta.env.VITE_BACKEND_WS_URL || "ws://localhost:3000";
+const VITE_BACKEND_API_URL =  "http://localhost:3000";
+const VITE_BACKEND_WS_URL = "ws://localhost:3000";
+console.log("API URL =>", VITE_BACKEND_API_URL);
+console.log("WS URL  =>", VITE_BACKEND_WS_URL);
+
 
 const Home = () => {
     const [url, setUrl] = useState("");
