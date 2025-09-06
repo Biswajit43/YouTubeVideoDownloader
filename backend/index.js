@@ -6,18 +6,17 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 
-// Get the exact path to the yt-dlp binary
+
 const ytDlpPath = require('yt-dlp-exec').path;
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-// --- FIX 2: Use a secure and specific CORS configuration ---
+
 const allowedOrigins = [
-    'http://localhost:5173', // Default Vite port
-    'http://localhost:3000'  // Default Create React App port
-    // Add your deployed frontend URL here later
+    'http://localhost:5173', 
+
 ];
 
 const corsOptions = {
@@ -40,7 +39,6 @@ if (!fs.existsSync(downloadsDir)) {
 app.use('/downloads', express.static(downloadsDir));
 
 
-// --- FIX 1: This is the ONLY app.post("/submit",...) needed ---
 app.post("/submit", async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: "Enter a valid URL" });
@@ -87,7 +85,7 @@ wss.on("connection", (ws) => {
 
             downloadProcess.on("close", () => {
                 console.log("Download finished!");
-                // --- FIX 3: Use the robust Render environment variable ---
+    
                 const publicUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:3000`;
                 ws.send(JSON.stringify({
                     type: "complete",
