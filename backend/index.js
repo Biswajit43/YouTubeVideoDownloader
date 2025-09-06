@@ -5,32 +5,29 @@ const youtubedl = require("yt-dlp-exec");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-
+const app = express();
 
 const ytDlpPath = require('yt-dlp-exec').path;
 
-const app = express();
+app.use(cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true
+}));
+
+// Handle preflight requests for all routes
+app.options("*", cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true
+}));
+
+
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-
-const allowedOrigins = [
-    'http://localhost:5173', 
-
-];
-
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    }
-};
-
-app.use(cors(corsOptions));
-app.use(express.json());
 
 const downloadsDir = path.join(__dirname, 'downloads');
 if (!fs.existsSync(downloadsDir)) {
@@ -109,4 +106,4 @@ wss.on("connection", (ws) => {
 app.get('/', (req, res) => res.send("hello biswajit !"));
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`)); 
+server.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));  
