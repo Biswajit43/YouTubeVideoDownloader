@@ -6,7 +6,6 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 
-// --- FIX 1 ---
 // Get the exact path to the yt-dlp binary
 const ytDlpPath = require('yt-dlp-exec').path;
 
@@ -14,7 +13,24 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-app.use(cors());
+// --- FIX 2: Use a secure and specific CORS configuration ---
+const allowedOrigins = [
+    'http://localhost:5173', // Default Vite port
+    'http://localhost:3000'  // Default Create React App port
+    // Add your deployed frontend URL here later
+];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 const downloadsDir = path.join(__dirname, 'downloads');
@@ -23,6 +39,8 @@ if (!fs.existsSync(downloadsDir)) {
 }
 app.use('/downloads', express.static(downloadsDir));
 
+
+// --- FIX 1: This is the ONLY app.post("/submit",...) needed ---
 app.post("/submit", async (req, res) => {
     const { url } = req.body;
     if (!url) return res.status(400).json({ error: "Enter a valid URL" });
@@ -30,7 +48,7 @@ app.post("/submit", async (req, res) => {
         const vidinfo = await youtubedl(url, {
             dumpSingleJson: true,
             noWarnings: true,
-            ytDlpPath: ytDlpPath, // Use the explicit path
+            ytDlpPath: ytDlpPath,
         });
         return res.json(vidinfo);
     } catch (err) {
@@ -38,6 +56,7 @@ app.post("/submit", async (req, res) => {
         return res.status(500).json({ error: "Something went wrong", details: err.message });
     }
 });
+
 
 wss.on("connection", (ws) => {
     console.log("Client connected for download");
@@ -53,9 +72,11 @@ wss.on("connection", (ws) => {
                 format: "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/best",
                 output: outputPath,
                 mergeOutputFormat: "mp4",
-                ytDlpPath: ytDlpPath, // Use the explicit path
+                ytDlpPath: ytDlpPath,
             });
+
             const progressRegex = /\[download\]\s+(\d+\.?\d*)%/;
+
             downloadProcess.stderr.on("data", (data) => {
                 const text = data.toString();
                 const match = text.match(progressRegex);
@@ -63,20 +84,22 @@ wss.on("connection", (ws) => {
                     ws.send(JSON.stringify({ type: "progress", percentage: parseFloat(match[1]) }));
                 }
             });
+
             downloadProcess.on("close", () => {
                 console.log("Download finished!");
-                // --- FIX 2 ---
-                // Use Render's environment variable for the public URL
+                // --- FIX 3: Use the robust Render environment variable ---
                 const publicUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:3000`;
                 ws.send(JSON.stringify({
                     type: "complete",
                     fileUrl: `${publicUrl}/downloads/${finalFilename}`
                 }));
             });
+
             downloadProcess.on("error", (err) => {
                 console.error("Error during download process:", err);
                 ws.send(JSON.stringify({ type: "error", message: "Failed to process video." }));
             });
+
         } catch (err) {
             console.error("Initial error:", err);
             ws.send(JSON.stringify({ type: "error", message: "Failed to fetch video information." }));
@@ -86,8 +109,6 @@ wss.on("connection", (ws) => {
 });
 
 app.get('/', (req, res) => res.send("hello biswajit !"));
-console.log("API URL =>", import.meta.env.VITE_BACKEND_API_URL);
-console.log("WS URL  =>", import.meta.env.VITE_BACKEND_WS_URL);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
