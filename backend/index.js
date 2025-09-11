@@ -6,7 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 const app = express();
-
+app.use(express.json()); 
 const ytDlpPath = require('yt-dlp-exec').path;
 
 app.use(cors({
