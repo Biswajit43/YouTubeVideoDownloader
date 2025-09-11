@@ -17,12 +17,14 @@ app.use(cors({
 }));
 
 // Handle preflight requests for all routes
-app.options("*", cors({
+// Handle preflight requests for all routes
+app.options("/*", cors({
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
     credentials: true
 }));
+
 
 
 const server = http.createServer(app);
